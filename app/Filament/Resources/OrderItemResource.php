@@ -4,19 +4,20 @@ namespace App\Filament\Resources;
 
 use Filament\Forms;
 use Filament\Tables;
-use App\Models\Order;
 use Filament\Forms\Form;
+use App\Models\OrderItem;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
-use App\Filament\Resources\OrderResource\Pages;
+use App\Filament\Resources\OrderItemResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\OrderResource\RelationManagers;
+use App\Filament\Resources\OrderItemResource\RelationManagers;
+use Illuminate\Database\Eloquent\Model;
 
-class OrderResource extends Resource
+class OrderItemResource extends Resource
 {
-    protected static ?string $model = Order::class;
+    protected static ?string $model = OrderItem::class;
 
     // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     public static function getNavigationGroup(): ?string
@@ -25,28 +26,25 @@ class OrderResource extends Resource
     }
     public static function getNavigationSort(): ?int
     {
-        return 30;
+        return 40;
     }
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('transaction_number')
+                Forms\Components\TextInput::make('order_id')
                     ->required()
-                    ->maxLength(255),
+                    ->numeric(),
+                Forms\Components\TextInput::make('product_id')
+                    ->required()
+                    ->numeric(),
+                Forms\Components\TextInput::make('quantity')
+                    ->required()
+                    ->numeric()
+                    ->default(1),
                 Forms\Components\TextInput::make('total_price')
                     ->required()
                     ->numeric(),
-                Forms\Components\TextInput::make('total_item')
-                    ->required()
-                    ->numeric()
-                    ->default(0),
-                Forms\Components\TextInput::make('cashier_id')
-                    ->numeric(),
-                Forms\Components\TextInput::make('payment_method')
-                    ->required()
-                    ->maxLength(255)
-                    ->default('cash'),
             ]);
     }
 
@@ -54,17 +52,20 @@ class OrderResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('transaction_number')
-                    ->searchable(),
+                // Tables\Columns\TextColumn::make('order_id')
+                //     ->numeric()
+                //     ->sortable(),
+                // Tables\Columns\TextColumn::make('product_id')
+                //     ->numeric()
+                //     ->sortable(),
+                TextColumn::make('order.transaction_number')->label('Invoice')->searchable(),
+                TextColumn::make('product.name')->label('Product')->searchable(),
+                Tables\Columns\TextColumn::make('quantity')
+                    ->numeric()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('total_price')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('total_item')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('user.name')->label('Cashier Name'),
-                Tables\Columns\TextColumn::make('payment_method')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -77,9 +78,9 @@ class OrderResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
+            // ->actions([
+            //     Tables\Actions\EditAction::make(),
+            // ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
@@ -97,12 +98,16 @@ class OrderResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListOrders::route('/'),
-            'create' => Pages\CreateOrder::route('/create'),
-            'edit' => Pages\EditOrder::route('/{record}/edit'),
+            'index' => Pages\ListOrderItems::route('/'),
+            'create' => Pages\CreateOrderItem::route('/create'),
+            'edit' => Pages\EditOrderItem::route('/{record}/edit'),
         ];
     }
     public static function canCreate(): bool
+    {
+        return false;
+    }
+    public static function canEdit(Model $record): bool
     {
         return false;
     }

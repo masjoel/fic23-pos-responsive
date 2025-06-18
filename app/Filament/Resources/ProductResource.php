@@ -18,8 +18,15 @@ class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
+    // protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Master Data';
+    }
+    public static function getNavigationSort(): ?int
+    {
+        return 10;
+    }
     public static function form(Form $form): Form
     {
         return $form
@@ -40,9 +47,9 @@ class ProductResource extends Resource
                     )->required()
                     ->searchable(),
                 Forms\Components\FileUpload::make('image')
-                    ->directory('uploads/produk') 
-                    ->image() 
-                    ->imageEditor(), 
+                    ->directory('uploads/produk')
+                    ->image()
+                    ->imageEditor(),
                 Forms\Components\TextInput::make('stock')
                     ->required()
                     ->numeric()
